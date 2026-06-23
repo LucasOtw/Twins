@@ -50,7 +50,11 @@ schemes:
         Twins: all
     run:
       config: Debug
-      storeKitConfiguration: Twins.storekit
+      # NB: la config StoreKit n'est PAS câblée ici volontairement — sur un
+      # device physique, Xcode + StoreKitTest plantent au lancement
+      # (-[OS_dispatch_mach_msg _setContext:]: unrecognized selector).
+      # Pour tester les achats EN SIMULATEUR : Product > Scheme > Edit Scheme >
+      # Run > Options > StoreKit Configuration = Twins.storekit.
     test:
       config: Debug
     profile:

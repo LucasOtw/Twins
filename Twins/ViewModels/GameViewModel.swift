@@ -6,6 +6,7 @@ import Observation
 enum GameMode: String, CaseIterable, Identifiable {
     case progressive   // montée en intensité — le défaut
     case questionsOnly // uniquement des questions, montée conservée
+    case spicyHot      // direct dans le vif (pimenté → chaud) — réservé premium
 
     var id: String { rawValue }
 
@@ -13,6 +14,7 @@ enum GameMode: String, CaseIterable, Identifiable {
         switch self {
         case .progressive:   return "Montée progressive"
         case .questionsOnly: return "Questions only"
+        case .spicyHot:      return "Spicy hot"
         }
     }
 
@@ -20,6 +22,7 @@ enum GameMode: String, CaseIterable, Identifiable {
         switch self {
         case .progressive:   return "Du tendre au brûlant, au fil de la soirée."
         case .questionsOnly: return "Que des questions, toujours plus complices."
+        case .spicyHot:      return "Direct dans le vif — pimenté puis brûlant."
         }
     }
 
@@ -27,6 +30,15 @@ enum GameMode: String, CaseIterable, Identifiable {
         switch self {
         case .progressive:   return "🔥"
         case .questionsOnly: return "💬"
+        case .spicyHot:      return "🌶️"
+        }
+    }
+
+    /// Mode réservé à l'achat débloqué (grisé tant qu'on n'a pas payé).
+    var requiresUnlock: Bool {
+        switch self {
+        case .spicyHot:                 return true
+        case .progressive, .questionsOnly: return false
         }
     }
 }
@@ -109,6 +121,7 @@ final class GameViewModel {
         switch mode {
         case .progressive:   pool = deck.cards
         case .questionsOnly: pool = deck.cards.filter { $0.type == .question }
+        case .spicyHot:      pool = deck.cards.filter { $0.level != .soft }
         }
         return unlocked ? unlockedOrder(pool: pool) : freeOrder(pool: pool)
     }
@@ -143,15 +156,17 @@ final class GameViewModel {
             order.append(pick)
         }
 
+        // Une transition s'affiche la première fois qu'un palier supérieur au
+        // palier de base du paquet apparaît (les seuils t2/t3 contrôlent
+        // *quand* ces paliers entrent via levelCap). Ainsi « Spicy hot », qui
+        // démarre déjà en pimenté, n'annonce que le passage au chaud.
+        let baseLevel = order.map(\.level).min() ?? .soft
+        var announced = Set<Level>()
         var steps: [GameStep] = []
-        let hasLevel2 = pool.contains { $0.level == .pimente }
-        let hasLevel3 = pool.contains { $0.level == .chaud }
-        for (position, card) in order.enumerated() {
-            if position == t2, hasLevel2, order.count > t2 {
-                steps.append(.transition(.pimente))
-            }
-            if position == t3, hasLevel3, order.count > t3 {
-                steps.append(.transition(.chaud))
+        for card in order {
+            if card.level > baseLevel, !announced.contains(card.level) {
+                announced.insert(card.level)
+                steps.append(.transition(card.level))
             }
             steps.append(.card(card))
         }

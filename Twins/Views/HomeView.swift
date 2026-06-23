@@ -15,10 +15,10 @@ struct HomeView: View {
             Theme.ambiance(for: .soft).ignoresSafeArea()
             FloatingCardsBackdrop()
 
-            VStack(spacing: Theme.Spacing.lg) {
-                Spacer()
+            VStack(spacing: Theme.Spacing.md) {
+                Spacer(minLength: Theme.Spacing.lg)
                 header
-                Spacer()
+                Spacer(minLength: Theme.Spacing.lg)
                 modePicker
                 startButton
                 footer
@@ -52,9 +52,10 @@ struct HomeView: View {
                 )
                 .shadow(color: Theme.accent(for: .pimente).opacity(0.5), radius: 24, y: 6)
             Text("Le jeu de cartes qui rapproche.\nUn téléphone, deux complices, une soirée qui monte.")
-                .font(.system(.body, design: .rounded))
+                .font(.system(.subheadline, design: .rounded))
                 .foregroundStyle(.white.opacity(0.85))
                 .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
                 .shadow(color: .black.opacity(0.5), radius: 8)
         }
     }
@@ -62,8 +63,13 @@ struct HomeView: View {
     private var modePicker: some View {
         VStack(spacing: Theme.Spacing.sm) {
             ForEach(GameMode.allCases) { option in
-                ModeRow(mode: option, isSelected: option == mode) {
-                    withAnimation(.smooth(duration: 0.2)) { mode = option }
+                let locked = option.requiresUnlock && !store.isUnlocked
+                ModeRow(mode: option, isSelected: option == mode, isLocked: locked) {
+                    if locked {
+                        showPaywall = true
+                    } else {
+                        withAnimation(.smooth(duration: 0.2)) { mode = option }
+                    }
                 }
             }
         }
@@ -103,35 +109,64 @@ struct HomeView: View {
 private struct ModeRow: View {
     let mode: GameMode
     let isSelected: Bool
+    let isLocked: Bool
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
             HStack(spacing: Theme.Spacing.md) {
                 icon
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(mode.title)
-                        .font(.system(.headline, design: .rounded))
-                        .foregroundStyle(.white)
+                    .opacity(isLocked ? 0.85 : 1)
+                VStack(alignment: .leading, spacing: 3) {
+                    HStack(spacing: Theme.Spacing.xs) {
+                        Text(mode.title)
+                            .font(.system(.headline, design: .rounded))
+                            .foregroundStyle(.white)
+                        if isLocked { premiumPill }
+                    }
                     Text(mode.subtitle)
                         .font(.system(.footnote, design: .rounded))
                         .foregroundStyle(.white.opacity(0.7))
+                        .fixedSize(horizontal: false, vertical: true)
                 }
                 Spacer()
-                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-                    .font(.title3)
-                    .foregroundStyle(isSelected ? Theme.accent(for: .pimente) : .white.opacity(0.4))
+                trailing
             }
             .padding(Theme.Spacing.md)
             .frame(maxWidth: .infinity, alignment: .leading)
+            .opacity(isLocked ? 0.65 : 1)
             .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: Theme.Radius.control, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: Theme.Radius.control, style: .continuous)
-                    .stroke(isSelected ? Theme.accent(for: .pimente).opacity(0.7) : .clear, lineWidth: 1.5)
+                    .stroke(isSelected && !isLocked ? Theme.accent(for: .pimente).opacity(0.7) : .clear, lineWidth: 1.5)
             )
         }
         .buttonStyle(.plain)
-        .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : .isButton)
+        .accessibilityLabel("\(mode.title)\(isLocked ? ", verrouillé, premium" : "")")
+        .accessibilityAddTraits(isSelected && !isLocked ? [.isButton, .isSelected] : .isButton)
+    }
+
+    @ViewBuilder
+    private var trailing: some View {
+        if isLocked {
+            Image(systemName: "lock.fill")
+                .font(.headline)
+                .foregroundStyle(Theme.accent(for: .chaud))
+        } else {
+            Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                .font(.title3)
+                .foregroundStyle(isSelected ? Theme.accent(for: .pimente) : .white.opacity(0.4))
+        }
+    }
+
+    private var premiumPill: some View {
+        Text("PREMIUM")
+            .font(.system(size: 10, weight: .bold, design: .rounded))
+            .tracking(1)
+            .foregroundStyle(.white)
+            .padding(.horizontal, 7)
+            .padding(.vertical, 2)
+            .background(Theme.accent(for: .chaud), in: Capsule())
     }
 
     private var icon: some View {
@@ -152,13 +187,21 @@ private struct ModeRow: View {
             return AnyShapeStyle(LinearGradient(
                 colors: [Theme.accent(for: .soft), Theme.accent(for: .pimente), Theme.accent(for: .chaud)],
                 startPoint: .topLeading, endPoint: .bottomTrailing))
+        case .spicyHot:
+            return AnyShapeStyle(LinearGradient(
+                colors: [Theme.accent(for: .pimente), Theme.accent(for: .chaud)],
+                startPoint: .topLeading, endPoint: .bottomTrailing))
         case .questionsOnly:
             return AnyShapeStyle(Color.white.opacity(0.12))
         }
     }
 
     private var shadowColor: Color {
-        mode == .progressive ? Theme.accent(for: .pimente).opacity(0.6) : .clear
+        switch mode {
+        case .progressive: return Theme.accent(for: .pimente).opacity(0.6)
+        case .spicyHot:    return Theme.accent(for: .chaud).opacity(0.6)
+        case .questionsOnly: return .clear
+        }
     }
 }
 

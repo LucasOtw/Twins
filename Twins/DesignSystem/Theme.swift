@@ -37,7 +37,7 @@ enum Theme {
     static func accent(for level: Level) -> Color {
         switch level {
         case .soft:    return Color(red: 0.96, green: 0.62, blue: 0.70) // rose tendre
-        case .pimente: return Color(red: 0.98, green: 0.52, blue: 0.31) // orange chaud
+        case .pimente: return Color(red: 1.0, green: 0.416, blue: 0.102) // orange pétant #FF6A1A
         case .chaud:   return Color(red: 0.86, green: 0.16, blue: 0.36) // rouge profond
         }
     }

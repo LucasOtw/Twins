@@ -89,11 +89,13 @@ struct PaywallView: View {
                     }
                 }
                 .frame(maxWidth: .infinity)
-                .frame(minHeight: 30)
             }
             .buttonStyle(.glassProminent)
+            .buttonBorderShape(.capsule)
+            .controlSize(.large)
             .tint(accent)
             .disabled(store.phase == .purchasing)
+            .sensoryFeedback(.success, trigger: store.isUnlocked)
 
             HStack(spacing: Theme.Spacing.md) {
                 Button("Restaurer mes achats") { Task { await store.restore() } }

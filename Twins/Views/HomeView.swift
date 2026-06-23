@@ -62,11 +62,12 @@ struct HomeView: View {
             Text("Commencer")
                 .font(Theme.Font.button)
                 .frame(maxWidth: .infinity)
-                .frame(height: 30)
         }
         .buttonStyle(.glassProminent)
-        .tint(Theme.accent(for: .pimente))
+        .buttonBorderShape(.capsule)
         .controlSize(.large)
+        .tint(Theme.accent(for: .pimente))
+        .sensoryFeedback(.impact(weight: .medium, intensity: 1.0), trigger: isPlaying)
     }
 
     private var footer: some View {

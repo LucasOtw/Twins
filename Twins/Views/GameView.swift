@@ -40,8 +40,11 @@ struct GameView: View {
             }
             .padding(Theme.Spacing.md)
         }
+        // Haptique bien présente à chaque carte, renforcée au passage de palier.
         .sensoryFeedback(trigger: viewModel.index) { _, _ in
-            viewModel.lastAdvanceWasMilestone ? .impact(weight: .heavy) : .selection
+            viewModel.lastAdvanceWasMilestone
+                ? .impact(weight: .heavy, intensity: 1.0)
+                : .impact(weight: .medium, intensity: 0.95)
         }
     }
 
@@ -72,9 +75,10 @@ struct GameView: View {
             Button { dismiss() } label: {
                 Image(systemName: "xmark")
                     .font(.headline)
-                    .frame(width: 30, height: 30)
             }
             .buttonStyle(.glass)
+            .buttonBorderShape(.circle)
+            .controlSize(.large)
             .accessibilityLabel("Quitter la partie")
 
             Spacer()
@@ -129,9 +133,10 @@ struct GameView: View {
         Button { go { viewModel.goBack() } } label: {
             Image(systemName: "arrow.uturn.backward")
                 .font(Theme.Font.button)
-                .frame(width: 30, height: 44)
         }
         .buttonStyle(.glass)
+        .buttonBorderShape(.circle)
+        .controlSize(.large)
         .accessibilityLabel("Carte précédente")
     }
 
@@ -140,9 +145,10 @@ struct GameView: View {
             Text(title)
                 .font(Theme.Font.button)
                 .frame(maxWidth: .infinity)
-                .frame(height: 44)
         }
         .buttonStyle(.glassProminent)
+        .buttonBorderShape(.capsule)
+        .controlSize(.large)
         .tint(Theme.accent(for: level))
     }
 
@@ -222,9 +228,10 @@ private struct EndView: View {
                     Text("Rejouer")
                         .font(Theme.Font.button)
                         .frame(maxWidth: .infinity)
-                        .frame(height: 44)
                 }
                 .buttonStyle(.glassProminent)
+                .buttonBorderShape(.capsule)
+                .controlSize(.large)
                 .tint(Theme.accent(for: .pimente))
 
                 Button("Retour à l'accueil", action: onHome)

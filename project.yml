@@ -13,6 +13,7 @@ settings:
     SWIFT_VERSION: "5.0"
     DEVELOPMENT_LANGUAGE: fr
     CODE_SIGN_STYLE: Automatic
+    DEVELOPMENT_TEAM: HY6ZSGAUP6
     ENABLE_USER_SCRIPT_SANDBOXING: YES
     # iPhone en iOS 27 + Xcode 26 : le « debug dylib » et les checkers injectés
     # par Xcode plantent au lancement (-[OS_dispatch_mach_msg _setContext:]).
@@ -54,6 +55,10 @@ schemes:
         Twins: all
     run:
       config: Debug
+      # iOS 27 + Xcode 26 : l'attachement du débogueur LLDB échoue (SIGKILL au
+      # lancement). On lance SANS débogueur — l'app s'installe et tourne
+      # normalement (pas de breakpoints tant qu'Xcode ne supporte pas iOS 27).
+      debugEnabled: false
       # Checkers runtime désactivés : en version 26, ils plantent sur un device
       # iOS 27 (incompat de version). Cf aussi le patch TPC après génération.
       disableMainThreadChecker: true

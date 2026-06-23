@@ -14,6 +14,10 @@ settings:
     DEVELOPMENT_LANGUAGE: fr
     CODE_SIGN_STYLE: Automatic
     ENABLE_USER_SCRIPT_SANDBOXING: YES
+    # iPhone en iOS 27 + Xcode 26 : le « debug dylib » et les checkers injectés
+    # par Xcode plantent au lancement (-[OS_dispatch_mach_msg _setContext:]).
+    # On désactive le debug dylib (lancement monolithique, stable).
+    ENABLE_DEBUG_DYLIB: NO
 
 targets:
   Twins:
@@ -50,6 +54,9 @@ schemes:
         Twins: all
     run:
       config: Debug
+      # Checkers runtime désactivés : en version 26, ils plantent sur un device
+      # iOS 27 (incompat de version). Cf aussi le patch TPC après génération.
+      disableMainThreadChecker: true
       # NB: la config StoreKit n'est PAS câblée ici volontairement — sur un
       # device physique, Xcode + StoreKitTest plantent au lancement
       # (-[OS_dispatch_mach_msg _setContext:]: unrecognized selector).

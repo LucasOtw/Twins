@@ -18,9 +18,14 @@ Le `.xcodeproj` n'est pas commité — il est régénéré depuis `project.yml` 
 
 ```bash
 brew install xcodegen   # une fois
-xcodegen generate
+./Scripts/generate.sh   # génère le projet (PAS `xcodegen generate` direct)
 open Twins.xcodeproj
 ```
+
+> Utilise `./Scripts/generate.sh` plutôt que `xcodegen generate` : il réapplique
+> la désactivation du Thread Performance Checker (qui plante au lancement sur un
+> device iOS 27 avec Xcode 26). Ne lance pas la génération pendant qu'Xcode est
+> ouvert sur le projet — ou choisis « Revert » au bandeau « project modified ».
 
 Le schéma `Twins` est préconfiguré avec `Twins.storekit` pour tester les achats
 en local, sans App Store Connect.

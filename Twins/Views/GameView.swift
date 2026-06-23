@@ -38,7 +38,8 @@ struct GameView: View {
                 Spacer()
                 bottomControls
             }
-            .padding(Theme.Spacing.md)
+            .padding(.horizontal, Theme.Spacing.md)
+            .padding(.bottom, Theme.Spacing.md)
         }
         // Haptique bien présente à chaque carte, renforcée au passage de palier.
         .sensoryFeedback(trigger: viewModel.index) { _, _ in
@@ -72,17 +73,6 @@ struct GameView: View {
 
     private var topBar: some View {
         HStack {
-            Button { dismiss() } label: {
-                Image(systemName: "xmark")
-                    .font(.headline)
-            }
-            .buttonStyle(.glass)
-            .buttonBorderShape(.circle)
-            .controlSize(.large)
-            .accessibilityLabel("Quitter la partie")
-
-            Spacer()
-
             if showsProgress {
                 let p = viewModel.cardProgress
                 Text("\(p.current) / \(p.total)")
@@ -93,6 +83,17 @@ struct GameView: View {
                     .adaptiveGlass(interactive: false)
                     .accessibilityLabel("Carte \(p.current) sur \(p.total)")
             }
+
+            Spacer()
+
+            Button { dismiss() } label: {
+                Image(systemName: "xmark")
+                    .font(.headline)
+            }
+            .buttonStyle(.glass)
+            .buttonBorderShape(.circle)
+            .controlSize(.large)
+            .accessibilityLabel("Quitter la partie")
         }
     }
 

@@ -7,10 +7,13 @@ struct CardView: View {
     let card: Card
 
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var pulse = false
     private var accent: Color { Theme.accent(for: card.level) }
 
     var body: some View {
         ZStack {
+            glow
             cardSurface
 
             VStack(spacing: Theme.Spacing.lg) {
@@ -34,6 +37,24 @@ struct CardView: View {
         .padding(.horizontal, Theme.Spacing.md)
         .padding(.top, 60)
         .padding(.bottom, 96)
+        .onAppear {
+            guard !reduceMotion else { return }
+            withAnimation(.easeInOut(duration: 2.6).repeatForever(autoreverses: true)) {
+                pulse = true
+            }
+        }
+    }
+
+    // MARK: Halo animé
+
+    /// Lueur d'accent diffuse derrière la carte, qui respire lentement.
+    private var glow: some View {
+        RoundedRectangle(cornerRadius: Theme.Radius.card, style: .continuous)
+            .fill(accent)
+            .blur(radius: 55)
+            .opacity(reduceMotion ? 0.30 : (pulse ? 0.55 : 0.28))
+            .scaleEffect(reduceMotion ? 0.95 : (pulse ? 1.0 : 0.9))
+            .accessibilityHidden(true)
     }
 
     // MARK: Surface

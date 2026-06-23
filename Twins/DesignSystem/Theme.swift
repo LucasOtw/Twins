@@ -36,23 +36,25 @@ enum Theme {
     /// Accent d'un palier : doux/pastel → chaud → profond/intense.
     static func accent(for level: Level) -> Color {
         switch level {
-        case .soft:    return Color(red: 0.96, green: 0.62, blue: 0.70) // rose tendre
-        case .pimente: return Color(red: 1.0, green: 0.416, blue: 0.102) // orange pétant #FF6A1A
-        case .chaud:   return Color(red: 0.86, green: 0.16, blue: 0.36) // rouge profond
+        case .soft:    return Color(red: 0.97, green: 0.55, blue: 0.62) // rose chaud
+        case .pimente: return Color(red: 1.0, green: 0.478, blue: 0.0) // orange pétant #FF7A00
+        case .chaud:   return Color(red: 0.93, green: 0.16, blue: 0.16) // rouge sensuel #ED2929
         }
     }
 
     /// Dégradé d'ambiance plein écran derrière le contenu, par palier.
+    /// La teinte du palier irrigue plus largement l'écran → ambiance chaude,
+    /// lumière tamisée, plutôt qu'un fond noir froid.
     static func ambiance(for level: Level) -> LinearGradient {
         let base = accent(for: level)
         return LinearGradient(
             colors: [
-                base.opacity(0.42),
-                Color.black.opacity(0.92),
+                base.opacity(0.60),
+                base.opacity(0.16),
                 Color.black
             ],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
+            startPoint: .top,
+            endPoint: .bottom
         )
     }
 
@@ -61,20 +63,24 @@ enum Theme {
     /// mi-ton sombre) tout en donnant de la couleur et du relief.
     static func cardGradient(for level: Level) -> LinearGradient {
         let top: Color
+        let mid: Color
         let bottom: Color
         switch level {
-        case .soft:    // rose profond
-            top = Color(red: 0.71, green: 0.24, blue: 0.40)
-            bottom = Color(red: 0.11, green: 0.05, blue: 0.09)
-        case .pimente: // orange brûlé
-            top = Color(red: 0.78, green: 0.33, blue: 0.05)
-            bottom = Color(red: 0.10, green: 0.05, blue: 0.02)
-        case .chaud:   // cramoisi vif
-            top = Color(red: 0.76, green: 0.09, blue: 0.27)
-            bottom = Color(red: 0.10, green: 0.02, blue: 0.06)
+        case .soft:    // rose chaud
+            top = Color(red: 0.86, green: 0.34, blue: 0.46)
+            mid = Color(red: 0.40, green: 0.13, blue: 0.22)
+            bottom = Color(red: 0.10, green: 0.04, blue: 0.07)
+        case .pimente: // orange pétant
+            top = Color(red: 1.0, green: 0.52, blue: 0.12)
+            mid = Color(red: 0.64, green: 0.25, blue: 0.03)
+            bottom = Color(red: 0.13, green: 0.05, blue: 0.01)
+        case .chaud:   // rouge sensuel, chaud
+            top = Color(red: 0.92, green: 0.16, blue: 0.16)
+            mid = Color(red: 0.50, green: 0.06, blue: 0.08)
+            bottom = Color(red: 0.14, green: 0.02, blue: 0.02)
         }
         return LinearGradient(
-            colors: [top, bottom],
+            colors: [top, mid, bottom],
             startPoint: .topLeading,
             endPoint: .bottomTrailing
         )

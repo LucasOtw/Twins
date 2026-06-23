@@ -1,7 +1,8 @@
 import SwiftUI
 
-/// Accueil : on lance l'app, on choisit (ou pas) un mode, on appuie sur
-/// « Commencer », on joue. Aucun réglage obligatoire.
+/// Accueil : la première impression. Des cartes qui flottent en fond, un titre
+/// qui claque, deux modes lisibles d'un coup d'œil. On choisit (ou pas), on
+/// appuie sur « Commencer », on joue.
 struct HomeView: View {
     @Environment(StoreManager.self) private var store
 
@@ -12,8 +13,9 @@ struct HomeView: View {
     var body: some View {
         ZStack {
             Theme.ambiance(for: .soft).ignoresSafeArea()
+            FloatingCardsBackdrop()
 
-            VStack(spacing: Theme.Spacing.xl) {
+            VStack(spacing: Theme.Spacing.lg) {
                 Spacer()
                 header
                 Spacer()
@@ -38,12 +40,22 @@ struct HomeView: View {
     private var header: some View {
         VStack(spacing: Theme.Spacing.sm) {
             Text(AppInfo.name)
-                .font(.system(size: 64, weight: .heavy, design: .rounded))
-                .foregroundStyle(.white)
+                .font(.system(size: 68, weight: .heavy, design: .rounded))
+                .foregroundStyle(
+                    LinearGradient(
+                        colors: [
+                            Theme.accent(for: .soft),
+                            Theme.accent(for: .pimente),
+                            Theme.accent(for: .chaud)
+                        ],
+                        startPoint: .topLeading, endPoint: .bottomTrailing)
+                )
+                .shadow(color: Theme.accent(for: .pimente).opacity(0.5), radius: 24, y: 6)
             Text("Le jeu de cartes qui rapproche.\nUn téléphone, deux complices, une soirée qui monte.")
                 .font(.system(.body, design: .rounded))
-                .foregroundStyle(.white.opacity(0.8))
+                .foregroundStyle(.white.opacity(0.85))
                 .multilineTextAlignment(.center)
+                .shadow(color: .black.opacity(0.5), radius: 8)
         }
     }
 
@@ -84,7 +96,10 @@ struct HomeView: View {
     }
 }
 
-/// Ligne de sélection de mode (carte tappable, repli accessibilité via glass).
+// MARK: - Mode
+
+/// Ligne de sélection de mode avec un visuel parlant : pastille « chaude »
+/// (dégradé des 3 paliers) pour la montée, pastille calme pour les questions.
 private struct ModeRow: View {
     let mode: GameMode
     let isSelected: Bool
@@ -92,7 +107,8 @@ private struct ModeRow: View {
 
     var body: some View {
         Button(action: action) {
-            HStack(spacing: Theme.Spacing.sm) {
+            HStack(spacing: Theme.Spacing.md) {
+                icon
                 VStack(alignment: .leading, spacing: 2) {
                     Text(mode.title)
                         .font(.system(.headline, design: .rounded))
@@ -111,10 +127,104 @@ private struct ModeRow: View {
             .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: Theme.Radius.control, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: Theme.Radius.control, style: .continuous)
-                    .stroke(isSelected ? Theme.accent(for: .pimente).opacity(0.6) : .clear, lineWidth: 1.5)
+                    .stroke(isSelected ? Theme.accent(for: .pimente).opacity(0.7) : .clear, lineWidth: 1.5)
             )
         }
         .buttonStyle(.plain)
         .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : .isButton)
+    }
+
+    private var icon: some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .fill(iconBackground)
+                .frame(width: 50, height: 50)
+                .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(.white.opacity(0.2), lineWidth: 1))
+                .shadow(color: shadowColor, radius: 10, y: 4)
+            Text(mode.emoji)
+                .font(.system(size: 24))
+        }
+    }
+
+    private var iconBackground: AnyShapeStyle {
+        switch mode {
+        case .progressive:
+            return AnyShapeStyle(LinearGradient(
+                colors: [Theme.accent(for: .soft), Theme.accent(for: .pimente), Theme.accent(for: .chaud)],
+                startPoint: .topLeading, endPoint: .bottomTrailing))
+        case .questionsOnly:
+            return AnyShapeStyle(Color.white.opacity(0.12))
+        }
+    }
+
+    private var shadowColor: Color {
+        mode == .progressive ? Theme.accent(for: .pimente).opacity(0.6) : .clear
+    }
+}
+
+// MARK: - Fond de cartes flottantes
+
+/// Quelques mini-cartes colorées qui flottent doucement en fond, pour donner
+/// du relief et de l'envie dès le premier écran. Purement décoratif.
+private struct FloatingCardsBackdrop: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var animate = false
+
+    private struct Floater {
+        let level: Level
+        let symbol: String
+        let size: CGSize
+        let rotation: Double
+        let x: CGFloat   // fraction de largeur
+        let y: CGFloat   // fraction de hauteur
+        let float: CGFloat
+        let duration: Double
+    }
+
+    private let floaters: [Floater] = [
+        .init(level: .soft,    symbol: "bubble.left.and.bubble.right.fill", size: .init(width: 84, height: 112), rotation: -14, x: 0.17, y: 0.20, float: 16, duration: 3.6),
+        .init(level: .pimente, symbol: "flame.fill",                        size: .init(width: 96, height: 126), rotation:  13, x: 0.84, y: 0.17, float: 20, duration: 4.3),
+        .init(level: .chaud,   symbol: "heart.fill",                        size: .init(width: 72, height: 96),  rotation:  10, x: 0.86, y: 0.45, float: 13, duration: 3.2),
+        .init(level: .pimente, symbol: "hand.raised.fill",                  size: .init(width: 66, height: 88),  rotation: -11, x: 0.14, y: 0.46, float: 17, duration: 4.7),
+        .init(level: .soft,    symbol: "sparkles",                          size: .init(width: 60, height: 80),  rotation:   6, x: 0.50, y: 0.07, float: 11, duration: 3.0),
+    ]
+
+    var body: some View {
+        GeometryReader { geo in
+            ZStack {
+                ForEach(floaters.indices, id: \.self) { i in
+                    let f = floaters[i]
+                    card(f)
+                        .position(x: geo.size.width * f.x, y: geo.size.height * f.y)
+                        .offset(y: reduceMotion ? 0 : (animate ? f.float : -f.float))
+                        .animation(
+                            reduceMotion ? nil :
+                                .easeInOut(duration: f.duration).repeatForever(autoreverses: true),
+                            value: animate)
+                }
+            }
+        }
+        .ignoresSafeArea()
+        .allowsHitTesting(false)
+        .onAppear { animate = true }
+        .accessibilityHidden(true)
+    }
+
+    private func card(_ f: Floater) -> some View {
+        RoundedRectangle(cornerRadius: 20, style: .continuous)
+            .fill(Theme.cardGradient(for: f.level))
+            .frame(width: f.size.width, height: f.size.height)
+            .overlay(
+                Image(systemName: f.symbol)
+                    .font(.system(size: f.size.width * 0.32, weight: .bold))
+                    .foregroundStyle(.white.opacity(0.85))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                    .stroke(.white.opacity(0.18), lineWidth: 1)
+            )
+            .shadow(color: Theme.accent(for: f.level).opacity(0.5), radius: 18, y: 8)
+            .rotationEffect(.degrees(f.rotation))
+            .opacity(0.9)
     }
 }

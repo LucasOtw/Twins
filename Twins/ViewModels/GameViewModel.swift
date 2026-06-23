@@ -22,6 +22,13 @@ enum GameMode: String, CaseIterable, Identifiable {
         case .questionsOnly: return "Que des questions, toujours plus complices."
         }
     }
+
+    var emoji: String {
+        switch self {
+        case .progressive:   return "🔥"
+        case .questionsOnly: return "💬"
+        }
+    }
 }
 
 /// Une étape de la partie. La vue de jeu se contente d'afficher l'étape

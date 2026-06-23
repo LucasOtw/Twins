@@ -56,6 +56,30 @@ enum Theme {
         )
     }
 
+    /// Dégradé riche et coloré de la carte elle-même, par palier. Saturé en
+    /// haut, profond en bas → le texte blanc reste lisible (centré sur le
+    /// mi-ton sombre) tout en donnant de la couleur et du relief.
+    static func cardGradient(for level: Level) -> LinearGradient {
+        let top: Color
+        let bottom: Color
+        switch level {
+        case .soft:    // rose profond
+            top = Color(red: 0.71, green: 0.24, blue: 0.40)
+            bottom = Color(red: 0.11, green: 0.05, blue: 0.09)
+        case .pimente: // orange brûlé
+            top = Color(red: 0.78, green: 0.33, blue: 0.05)
+            bottom = Color(red: 0.10, green: 0.05, blue: 0.02)
+        case .chaud:   // cramoisi vif
+            top = Color(red: 0.76, green: 0.09, blue: 0.27)
+            bottom = Color(red: 0.10, green: 0.02, blue: 0.06)
+        }
+        return LinearGradient(
+            colors: [top, bottom],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+    }
+
     /// Fond neutre des écrans hors carte (accueil, fin).
     static let surface = Color.black
 }

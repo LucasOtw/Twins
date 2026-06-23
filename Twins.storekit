@@ -1,15 +1,5 @@
 {
-  "appPolicies" : {
-    "eula" : "",
-    "policies" : [
-      {
-        "locale" : "fr_FR",
-        "policyText" : "",
-        "policyURL" : ""
-      }
-    ]
-  },
-  "identifier" : "A1B2C3D4",
+  "identifier" : "5C0E2A10-0001-4B00-9000-000000000001",
   "nonRenewingSubscriptions" : [],
   "products" : [
     {
@@ -20,22 +10,16 @@
         {
           "description" : "Débloque les niveaux Pimenté et Chaud en entier, à vie.",
           "displayName" : "Tout débloquer",
-          "locale" : "fr_FR"
+          "locale" : "en_US"
         }
       ],
       "productID" : "com.lucasotw.twins.unlockall",
-      "referenceName" : "Déblocage complet Twins",
+      "referenceName" : "Tout débloquer Twins",
       "type" : "NonConsumable"
     }
   ],
   "settings" : {
-    "_applicationInternalID" : "0000000000",
-    "_developerTeamID" : "0000000000",
-    "_failTransactionsEnabled" : false,
-    "_lastSynchronizedDate" : 0,
-    "_locale" : "fr_FR",
-    "_storefront" : "FRA",
-    "_storeKitErrors" : []
+
   },
   "subscriptionGroups" : [],
   "version" : {
